@@ -1,28 +1,38 @@
 package org.example;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.io.FileSaver;
-import ij.process.ImageProcessor;
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class Stamp {
-    private final String filePath = "src/main/resources/photo_2023-12-21_15-06-36.jpg";
-    private final ImagePlus image = IJ.openImage(filePath);
 
 
+    public void insertSignature(String signature) throws Exception {
 
-    public void insertSignature(String signature) {
-        ImageProcessor ip = image.getProcessor();
-        Font font = new Font("Arial", Font.BOLD, 60);
-        ip.setFont(font);
-        ip.setColor(Color.BLACK);
-        FontMetrics metrics = ip.getFontMetrics();
-        int x = (image.getWidth() - metrics.stringWidth(signature)) / 2;
-        int y = (image.getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
-        ip.drawString(signature, x, y);
-        FileSaver file =new FileSaver(image);
-        file.saveAsPng("src/main/resources/stamp.jpg");
+        String filePath = "src/main/resources/without_background.png";
+        File file = new File(filePath);
+        if(!file.exists()){
+            throw new Exception("Stamp file don`t exist");
+        }
+
+        try {
+            BufferedImage bufferedImage = ImageIO.read(new File(filePath));
+            Graphics2D g2d = (Graphics2D) bufferedImage.getGraphics();
+            Font font = new Font("Arial", Font.BOLD, 60);
+            g2d.setFont(font);
+            g2d.setColor(Color.BLACK);
+            FontMetrics metrics = g2d.getFontMetrics();
+            int x = (bufferedImage.getWidth() - metrics.stringWidth(signature)) / 2;
+            int y = (bufferedImage.getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
+            g2d.drawString(signature, x ,y);
+            ImageIO.write(bufferedImage, "png", new File("src/main/resources/stamp.png"));
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
     }
 }
